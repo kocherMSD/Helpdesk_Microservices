@@ -1,0 +1,65 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+
+
+	<filter>
+	    <filter-name>CORS</filter-name>
+	    <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+	
+	    <init-param>
+	        <param-name>cors.allowOrigin</param-name>
+	        <param-value>*</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>cors.supportsCredentials</param-name>
+	        <param-value>false</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>cors.supportedHeaders</param-name>
+	        <param-value>accept, authorization, origin</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>cors.supportedMethods</param-name>
+	        <param-value>GET, POST, HEAD, OPTIONS</param-value>
+	    </init-param>
+	</filter>
+	
+	
+	<filter-mapping>
+	    <filter-name>CORS</filter-name>
+	    <url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<display-name>Helpdesk Catalog Service</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext.xml</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+	<servlet>
+		<servlet-name>Catalog Jersey Service </servlet-name>
+		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>org.helpdesk.services.impl</param-value>
+		</init-param>
+		<init-param>
+		   <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+		   <param-value>true</param-value>
+	    </init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>Catalog Jersey Service </servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+	
+</web-app>

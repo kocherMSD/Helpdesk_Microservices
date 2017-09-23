@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd 
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<context:annotation-config />
+	<aop:config proxy-target-class="true"></aop:config>
+	<context:component-scan base-package="org.helpdesk.services.request,org.helpdesk.services.response" />
+
+	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<!--reads config.properties file -->
+		<property name="location" value="classpath:Application.properties"></property>
+	</bean>
+
+	<bean id="DataSource" destroy-method="close" class="org.apache.tomcat.jdbc.pool.DataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://hostname:3306/helpdesk" />
+		<property name="username" value="root" />
+		<property name="password" value="Cisco@1234" />
+		<property value="2" name="initialSize" />
+		<property value="50" name="maxActive" />
+		<property value="select 1 from dual" name="validationQuery" />
+		<property value="true" name="testWhileIdle" />
+		<property value="true" name="testOnBorrow" />
+		<property value="0" name="minIdle" />
+		<property value="300000" name="minEvictableIdleTimeMillis" />
+		<property value="60000" name="timeBetweenEvictionRunsMillis" />
+		<property value="true" name="removeAbandoned" />
+		<property value="300" name="removeAbandonedTimeout" />
+		<property value="true" name="logAbandoned" />
+		<property value="120000" name="maxWait" />
+	</bean>
+
+
+	<bean id="UpdaterInterceptor" class="org.helpdesk.db.dao.UpdaterInterceptor" />
+
+
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="entityInterceptor" ref="UpdaterInterceptor" />
+		<property name="dataSource" ref="DataSource" />
+		<property name="annotatedClasses">
+			<list>
+				<value>org.helpdesk.db.model.ContractEntity</value>
+				<value>org.helpdesk.db.model.DeviceEntity</value>
+				<value>org.helpdesk.db.model.IssueTypeEntity</value>
+				<value>org.helpdesk.db.model.NoteEntity</value>
+				<value>org.helpdesk.db.model.ProductEntity</value>
+				<value>org.helpdesk.db.model.TicketRequestEntity</value>
+				<value>org.helpdesk.db.model.UsersEntity</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="dataService" class="org.helpdesk.db.dao.DataService">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="updater" class="org.helpdesk.db.dao.Updater">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="viewTicketDao" class="org.helpdesk.db.dao.ViewTicketDao" parent="dataService"/>
+	
+	<bean id="helpDeskTicketServiceHelper" class="org.helpdesk.helpers.HelpDeskTicketServiceHelper">
+		<property name="updater" ref="updater" />
+	</bean>
+
+	<bean id="helpDeskTicketService" class="org.helpdesk.services.impl.HelpDeskTicketServiceImpl">
+		<property name="helper" ref="helpDeskTicketServiceHelper" />
+	</bean>
+	
+	<bean id="helpDeskViewTicketHelper" class="org.helpdesk.helpers.HelpDeskViewTicketHelper">
+		<property name="dao" ref="viewTicketDao" />
+	</bean>
+	
+	<bean id="helpDeskViewTicketService" class="org.helpdesk.services.impl.HelpDeskViewTicketServiceImpl">
+	    <property name="helper" ref="helpDeskViewTicketHelper" />
+	</bean>
+</beans>	
