@@ -35,6 +35,25 @@ public class UsersEntity  extends BaseBusinessObject{
 	  
     @Column(name="companyname")
 	private String companyname;	
+    
+    
+    @Column(name="city")
+    private String city;
+    
+    public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getCountry() {
+		return country;
+	}
+	public void setCountry(String country) {
+		this.country = country;
+	}
+	@Column(name="country")
+    private String country;
 	  
     @Column(name="accesslevel")
 	private String accesslevel;	
